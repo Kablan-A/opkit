@@ -1,26 +1,50 @@
-import { Injectable } from '@nestjs/common';
+import { ConflictException, Injectable } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { UsersRepository } from './users.repository';
+import { hashPassword } from '../../common/utils/hash.util';
 
 @Injectable()
 export class UsersService {
-  create(createUserDto: CreateUserDto) {
-    return 'This action adds a new user';
+  constructor(private readonly usersRepository: UsersRepository) {}
+
+  async create(createUserDto: CreateUserDto) {
+    const existingUser = await this.usersRepository.findByEmail(
+      createUserDto.email,
+    );
+
+    if (existingUser) {
+      throw new ConflictException('User already exists');
+    }
+
+    const passwordHash = await hashPassword(createUserDto.password);
+    return this.usersRepository.create(createUserDto.email, passwordHash);
   }
 
-  findAll() {
-    return `This action returns all users`;
+  findAll(limit?: number, offset?: number) {
+    return this.usersRepository.findAll(limit, offset);
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} user`;
+  findOne(id: string) {
+    return this.usersRepository.findById(id);
   }
 
-  update(id: number, updateUserDto: UpdateUserDto) {
-    return `This action updates a #${id} user`;
+  findByEmail(email: string) {
+    return this.usersRepository.findByEmail(email);
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} user`;
+  async update(id: string, updateUserDto: UpdateUserDto) {
+    const passwordHash = updateUserDto.password
+      ? await hashPassword(updateUserDto.password)
+      : undefined;
+
+    return this.usersRepository.update(id, {
+      email: updateUserDto.email,
+      passwordHash,
+    });
+  }
+
+  delete(id: string) {
+    return this.usersRepository.delete(id);
   }
 }
