@@ -2,8 +2,8 @@ export class UserEntity {
   id: string;
   email: string;
   passwordHash: string;
-  createdAt: Date;
-  updatedAt: Date;
+  created_at: Date;
+  updated_at: Date;
 
   constructor(partial: Partial<UserEntity>) {
     Object.assign(this, partial);
