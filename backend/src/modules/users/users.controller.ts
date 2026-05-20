@@ -13,6 +13,7 @@ import { UsersService } from './users.service';
 import { CreateUserDto, ResponseUserDto, UpdateUserDto } from './dto';
 import { JwtAuthGuard } from 'src/common/guards/jwt-auth.guard';
 
+@UseGuards(JwtAuthGuard)
 @Controller('users')
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
@@ -27,7 +28,6 @@ export class UsersController {
     return new ResponseUserDto(createdUser);
   }
 
-  @UseGuards(JwtAuthGuard)
   @Get()
   async findAll(
     @Query('limit') limit?: string,
@@ -48,7 +48,6 @@ export class UsersController {
     };
   }
 
-  @UseGuards(JwtAuthGuard)
   @Get(':id')
   async findOne(@Param('id') id: string) {
     const user = await this.usersService.findOne(id);
@@ -59,7 +58,6 @@ export class UsersController {
     return new ResponseUserDto(user);
   }
 
-  @UseGuards(JwtAuthGuard)
   @Patch(':id')
   async update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
     const updatedUser = await this.usersService.update(id, updateUserDto);
@@ -70,7 +68,6 @@ export class UsersController {
     return new ResponseUserDto(updatedUser);
   }
 
-  @UseGuards(JwtAuthGuard)
   @Delete(':id')
   delete(@Param('id') id: string) {
     return this.usersService.delete(id);
